@@ -58,7 +58,7 @@ const onKeyDown = (e: KeyboardEvent) => {
 	border-radius: min(5.625vw, 1.5rem);
 	border-width: 0;
 	background-color: var(--blue-45);
-	color: var(--blue-80);
+	color: var(--blue-95);
 	font-size: min(5.625vw, 1.5rem);
 }
 
