@@ -1,0 +1,10 @@
+<svg viewBox="0 0 200 200" width="100px" height="100px" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="25%" stop-color="hsl(220, 40%, 5%)" />
+    <stop offset="75%" stop-color="hsl(220, 40%, 15%)" />
+  </linearGradient>
+  <ellipse fill="url(#bg)" cx="100" cy="100" rx="75" ry="75"/>
+  <path stroke="hsl(220, 40%, 55%)" stroke-width="3" fill="none" d="M 80 90 C 80 135 120 135 120 90"/>
+  <ellipse fill="hsl(220, 40%, 55%)" cx="145" cy="100" rx="12" ry="12"/>
+  <ellipse fill="hsl(220, 40%, 55%)" cx="55" cy="100" rx="12" ry="12"/>
+</svg>

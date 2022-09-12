@@ -1,0 +1,47 @@
+:root {
+	--hue: 220;
+	--sat: 40%; 
+	--blue-95: hsl(var(--hue), var(--sat), 95%);
+	--blue-85: hsl(var(--hue), var(--sat), 85%);
+	--blue-80: hsl(var(--hue), var(--sat), 80%);
+	--blue-75: hsl(var(--hue), var(--sat), 75%);
+	--blue-65: hsl(var(--hue), var(--sat), 65%);
+	--blue-55: hsl(var(--hue), var(--sat), 55%);
+	--blue-50: hsl(var(--hue), var(--sat), 50%);
+	--blue-45: hsl(var(--hue), var(--sat), 45%);
+	--blue-40: hsl(var(--hue), var(--sat), 40%);
+	--blue-20: hsl(var(--hue), var(--sat), 20%);
+	--blue-15: hsl(var(--hue), var(--sat), 15%);
+	--blue-10: hsl(var(--hue), var(--sat), 10%);
+	--blue-5: hsl(var(--hue), var(--sat), 5%);
+	--red: hsl(0, 80%, 40%);
+	--transition: .25s;
+	--filter-med-blue-1: brightness(0) saturate(100%) invert(28%) sepia(65%) saturate(847%) hue-rotate(187deg) brightness(97%) contrast(71%);
+	--filter-med-blue-2: brightness(0) saturate(100%) invert(38%) sepia(75%) saturate(486%) hue-rotate(182deg) brightness(92%) contrast(77%);
+	--filter-med-blue-3: brightness(0) saturate(100%) invert(51%) sepia(20%) saturate(976%) hue-rotate(182deg) brightness(93%) contrast(95%);
+}
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+	font-style: normal;
+	font-weight: lighter;
+}
+html, body, main {
+	height: 100%;
+}
+body {
+	background-color: var(--blue-10);
+	position: relative;
+	background-repeat: no-repeat;
+}
+main {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+input {
+	outline: none;
+}

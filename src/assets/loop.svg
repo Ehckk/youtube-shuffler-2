@@ -1,0 +1,4 @@
+<svg viewBox="0 0 300 300" width="100px" height="100px" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <path d="M 230 125 L 210 125 L 250 150 L 290 125 L 270 125 C 260 0 40 0 30 125 L 70 125 C 80 50 220 50 230 125 Z" origin="0.5 0.5"/>
+  <path d="M 210 243.75 L 190 243.75 L 230 268.75 L 270 243.75 L 250 243.75 C 240 118.75 20 118.75 10 243.75 L 50 243.75 C 60 168.75 200 168.75 210 243.75 Z" transform="matrix(-1, 0, 0, -1, 280, 418.75)" origin="0.5 0.5"/>
+</svg>
