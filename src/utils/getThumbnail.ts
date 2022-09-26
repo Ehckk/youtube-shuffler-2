@@ -1,4 +1,4 @@
-import type { PlaylistItem } from "../interfaces"
+import type { PlaylistItem } from "@/interfaces"
 
 const getThumbnail = (item: PlaylistItem) => {
 	const thumbnails = item.snippet.thumbnails

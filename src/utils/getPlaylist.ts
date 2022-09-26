@@ -1,37 +1,20 @@
-import type { PlaylistItem, QueueItem } from "../interfaces"
-import { PlaylistErrors } from "../interfaces"
-import { getPlaylistId } from "./getPlaylistId"
-import { getPlaylistItems } from "./getPlaylistItems"
-import { playlist, playlistId } from '../store'
-import { get } from "svelte/store"
+import axios from "axios"
+import type { PlaylistParameters } from "@/interfaces/PlaylistParameters"
+import type { PlaylistResponse } from "@/interfaces/PlaylistResponse"
+const key = import.meta.env.VITE_YOUTUBE_TOKEN
 
-const getPlaylist = async (query: string | null, nextPageToken: string | null): Promise<void> => {
-	if (get(playlistId) === null) {
-		if (query === null) return Promise.reject(PlaylistErrors.BlankQuery)
-		if (query.length === 0) return Promise.reject(PlaylistErrors.BlankQuery)
-		const id = getPlaylistId(query)
-		playlistId.set(id)
-	} else if (nextPageToken === null) {
-		return
+const getPlaylist = async (playlistId: string) => {
+	const params: PlaylistParameters = {
+		key: key,
+		id: playlistId,
+		maxResults: 50,
+		part: 'id, snippet, status, contentDetails'
 	}
-	const { data, status } = await getPlaylistItems(get(playlistId)!, nextPageToken)
-	if (data === null) {
-		return Promise.reject(status === 400 ? PlaylistErrors.InvalidQuery : PlaylistErrors.Internal)
+	const { data } = await axios.get<PlaylistResponse>('https://www.googleapis.com/youtube/v3/' + 'playlists', { params })
+	if (data.items.length === 0) {
+		return Promise.reject('Playlist not found') 
 	}
-	const validItems: QueueItem[] = data.items.reduce((prevItems: QueueItem[], item: PlaylistItem) => {
-		if (item.snippet.title === 'Deleted video') {
-			console.log(`Failed to load video with id ${item.contentDetails.videoId} due to it being deleted`);
-			return prevItems
-		}
-		if (item.snippet.title === 'Private video') {
-			console.log(`Failed to load video with id ${item.contentDetails.videoId} due to it being private`);
-			return prevItems
-		}
-		prevItems.push({ position: prevItems.length, item })
-		return prevItems
-	}, [])
-	playlist.set([...get(playlist), ...validItems])
-	return await getPlaylist(query, data.nextPageToken ?? null)
+	return data.items[0]
 }
 
 export { getPlaylist }

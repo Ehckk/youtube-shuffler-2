@@ -1,0 +1,5 @@
+<svg viewBox="5 5 90 90" width="90" height="90">
+  <ellipse fill="hsl(0, 75%, 50%)" cx="50" cy="50" rx="45" ry="45"></ellipse>
+  <path fill="hsl(206, 16%, 92%)" d="M 70 80 L 80 70 L 30 20 L 20 30 L 70 80 Z"></path>
+  <path fill="hsl(206, 16%, 92%)" d="M 69.954 20 L 79.954 30 L 30 80 L 20 70 L 69.954 20 Z"></path>
+</svg>

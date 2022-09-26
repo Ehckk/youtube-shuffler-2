@@ -1,72 +1,49 @@
 <script lang="ts">
-import Item from './Item.svelte';
-import { current, playlist } from '../store'
-import { getThumbnail } from '../utils/getThumbnail';
-import type { QueueItem } from '../interfaces';
-import { createEventDispatcher } from 'svelte';
+	import Item from './Item.svelte';
+	import { playlist, queue } from '@/store'
+    import { sineOut } from 'svelte/easing';
+    import { fly } from 'svelte/transition';
+	import { flip } from 'svelte/animate';
 
-const dispatch = createEventDispatcher()
-let queue: HTMLDivElement;
-$: scrollHeightPerItem = queue ? (queue.scrollHeight / $playlist.length) : 0; // TODO lol
+	export let play: () => Promise<void>
+	
+	// $: scrollHeightPerItem = queue ? (queue.scrollHeight / $playlist.length) : 0
+	$: items = $playlist.map(i => i)
 
-const move = (index: number, direction: 'UP' | 'DOWN') => {
-	const newPlaylist =  $playlist.map((item) => item)
-	const moved: QueueItem[] = [] 
-	console.log(index, $current.position);
-	if (direction == 'UP' && index !== 0) {
-		moved.push(...newPlaylist.splice(index, 1))
-		newPlaylist.splice(index === $current.position + 1 ? $current.position === 0 ? 0 : $current.position : index - 1, 0, ...moved)
+	const scroll = (node: HTMLElement) => {
+		window.scrollTo({ top: node.getBoundingClientRect().bottom , behavior: 'smooth' })
 	}
-	if (direction == 'DOWN' && index !== $playlist.length) {
-		moved.push(...newPlaylist.splice(index, 1))
-		newPlaylist.splice(index === $current.position - 1 ? $current.position === $playlist.length - 1 ? $playlist.length - 1 : $current.position : index + 1, 0, ...moved)
-	}
-	$playlist = newPlaylist
-	dispatch('play')
-	// $playlist = $playlist.map((item, i) => { return { id: i, item: item }}) TODO 🐷
-}
-
-const playNow = async (item: QueueItem) => {
-	if ($current === item) return
-	$current = item
-	// TODO FIX ALL OF THIS SHIT BRUH 
-	// if ($current.position >= $playlist.length - 3) {
-	// 	queue.scrollTo({ top: queue.scrollHeight })
-	// }
-	// if ($current.position < 2) {
-	// 	queue.scrollTo({ top: 0 })
-	// }
-	// queue.scrollTo({ top: ($current.position - 1) * scrollHeightPerItem })
-	dispatch('play')
-}
-
 </script>
-<style>
-/* TODO: fix styles for mobile devices */
-.queue {
-	max-height: calc(100vh - min(15vw, 4rem) - min(11.25vw, 3rem) - min(11.25vw, 3rem) - min(11.25vw, 3rem) - min(1.875vw, .5rem));
-	width: 100%;
-	right: 0;
-	overflow-y: scroll;
-}
-.queue::-webkit-scrollbar {
-	width: min(3.75vw, 1rem);
-}
-.queue::-webkit-scrollbar-track {
-	background-image: linear-gradient(var(--blue-5) 20%, var(--blue-10) 80%);
-	border-radius: min(1.875vw, .5rem);
-}
-.queue::-webkit-scrollbar-thumb {
-	background-color: var(--blue-50);
-	border-radius: min(1.875vw, .5rem);
-}
-@media screen and (min-width: 1080px) {
-
-}
-</style>
-<!-- style={`max-height: ${(innerHeight - dashHeight - controlHeight)}px`} -->
-<div class="queue" bind:this={queue} >
-	{#each $playlist as item}
-		<Item {item} on:moveup={() => move(item.position, 'UP')} on:movedown={() => move(item.position, 'DOWN')} on:playnow={async () => await playNow(item)}/>
+<!-- TODO put transition on  -->
+<div class="queue" bind:this={$queue} use:scroll in:fly="{{ y: 50, duration: 500, easing: sineOut }}">
+	{#each items as item, index (item.id)}
+		<div class="itemWrapper" animate:flip={{ duration: 200, easing: sineOut }}>
+			<Item {item} {index} on:play={() => play()}/>
+		</div>	
 	{/each}
 </div>
+
+<style>
+/* TODO: fix styles for mobile devices */
+	.queue {
+		grid-area: queue;
+		width: calc(100% - min(2rem, 5vw));
+		height: calc(100vh - min(7rem, 17.5vw) - min(1rem, 2.5vw));
+		border-radius: min(2.5vw, 1rem);
+		overflow-y: auto;
+		background-color: var(--grey-900);
+	}
+	.queue::-webkit-scrollbar {
+		width: min(1rem, 2.5vw);
+	}
+	.queue::-webkit-scrollbar-track {
+		background-image: linear-gradient(var(--blue-800) 20%, var(--blue-700) 80%);
+		border-radius: min(.5rem, 1.25vw);
+	}
+	.queue::-webkit-scrollbar-thumb {
+		background-color: var(--blue-500);
+		border-radius: min(.5rem, 1.25vw);
+	}
+	@media screen and (max-width: 1100px) {
+	}
+</style>

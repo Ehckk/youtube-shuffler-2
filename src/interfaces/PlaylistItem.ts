@@ -1,10 +1,29 @@
-import type { PlaylistItemSnippet } from "./PlaylistItemSnippet"
+import type { Thumbnail } from "./Thumbnail"
 
 interface PlaylistItem {
-    kind: string
-    etag: string
     id: string
-    snippet: PlaylistItemSnippet
+    snippet: {
+        publishedAt: string
+        channelId: string
+        title: string
+        description: string
+        thumbnails: {
+            default: Thumbnail
+            medium: Thumbnail
+            high: Thumbnail
+            standard: Thumbnail
+            maxres: Thumbnail
+        },
+        channelTitle: string
+        playlistId: string
+        position: number
+        resourceId: {
+            kind: string
+            videoId: string
+        }
+        videoOwnerChannelTitle: string,
+        videoOwnerChannelId: string
+    }
     contentDetails: {
         videoId: string
         videoPublishedAt: string

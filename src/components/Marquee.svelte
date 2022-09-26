@@ -1,25 +1,37 @@
 <script lang="ts">
-import { current } from '../store'
-
-let titleWidth: number = 0;
-let boxWidth: number = 0;
-$: scrollOverFlow = boxWidth - titleWidth 
-$: scrollOffset = scrollOverFlow < 0 ? scrollOverFlow : 0;
+    import type { PlaylistItem } from "@/interfaces/PlaylistItem";
+    import { current } from "@/store";
+    import { sineOut } from "svelte/easing";
+    import { fly } from "svelte/transition";
+	
+	export let item: PlaylistItem
+	let titleWidth: number = 0;
+	let boxWidth: number = 0;
+	
+	$: scrollOverFlow = boxWidth - titleWidth 
+	$: scrollOffset = scrollOverFlow < 0 ? scrollOverFlow : 0;
 </script>
+
+{#if item}
+<a class="marquee__window" in:fly="{{ y: 50, duration: 500, easing: sineOut }}" style={`--scroll-offset: ${scrollOffset}px;`} bind:clientWidth={boxWidth} href={`https://www.youtube.com/watch?v=${item.contentDetails.videoId}`} target="_blank">
+	<h3 class="marquee__text" bind:clientWidth={titleWidth}>{item.snippet.title}</h3>
+</a>
+{/if}
 
 <style>
 .marquee__window {
-	width: 90%;
+	width: 80%;
 	overflow-x: hidden;
 	display: block;
+	text-align: center;
 }
 
 .marquee__text {
 	height: 100%;
-	width: fit-content;
 	display: inline-block;
-	color: var(--blue-85);
-	font-size: min(5.625vw, 1.5rem);
+	color: var(--grey-200);
+	font-size: min(3.75vw, 1.5rem);
+	font-weight: normal;
 	white-space: nowrap;
 	transition-property: height;
 	transition-duration: .125s; 
@@ -31,24 +43,14 @@ $: scrollOffset = scrollOverFlow < 0 ? scrollOverFlow : 0;
 }
 
 .marquee__window:active > .marquee__text {
-	color: var(--blue-75);
+	color: var(--blue-200);
 }
 .marquee__window:hover > .marquee__text {
-	color: var(--blue-85);
+	color: var(--blue-100);
 }
 @keyframes SlideText {
-	20% {
-		transform: translateX(0);
-	}
-	80% {
-		transform: translateX(var(--scroll-offset));
-	}
-	100% {
+	to {
 		transform: translateX(var(--scroll-offset));
 	}
 }
 </style>
-
-<a class="marquee__window" style={`--scroll-offset: ${scrollOffset}px;`} bind:clientWidth={boxWidth} href={`https://www.youtube.com/watch?v=${$current.item.contentDetails.videoId}`} target="_blank">
-	<h3 class="marquee__text" bind:clientWidth={titleWidth}>{$current.item.snippet.title}</h3>
-</a>

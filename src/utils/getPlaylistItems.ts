@@ -1,30 +1,47 @@
 import axios from "axios"
-import type { PlaylistItemSearch, PlaylistParameters, PlaylistResponse } from "../interfaces"
+import type { PlaylistItem } from "@/interfaces/PlaylistItem";
+import type { PlaylistItemResponse } from "@/interfaces/PlaylistItemResponse";
+import type { PlaylistParameters } from "@/interfaces/PlaylistParameters";
+import { get } from "svelte/store";
+import { playlist, notifs } from '@/store';
+import { formatQuery } from "./formatQuery";
+import { NotifType } from "@/interfaces/NotifType";
 const url = "https://www.googleapis.com/youtube/v3/";
 const key = import.meta.env.VITE_YOUTUBE_TOKEN
 
-async function getPlaylistItems(playlistId: string, pageToken: string | null): Promise<PlaylistResponse> {
+const fetchNextPage = async (playlistId: string, pageToken: string | null): Promise<PlaylistItemResponse> => {
 	const params: PlaylistParameters = {
 		key: key,
 		playlistId: playlistId,
 		maxResults: 50,
-		part: 'id, snippet, status, contentDetails'
+		part: 'id, snippet, status, contentDetails',
+		pageToken: pageToken ?? undefined
 	}
-	if (pageToken !== null) {
-		params.pageToken = pageToken
+	const { data } = await axios.get<PlaylistItemResponse>(url + 'playlistItems', { params })
+	return data
+}
+
+const getPlaylistItems = async (playlistId: string, firstPage: boolean, pageToken: string | null): Promise<void> => {
+	// console.log(playlistId, firstPage, pageToken);
+	if (!firstPage && pageToken === null) {
+		console.log('done');
+		return
 	}
-	let status: number = 200
-	const { data } = await axios.get<PlaylistItemSearch>(url + 'playlistItems', { params }).then((response) => {
-		if (response.data.items.length === 0) {
-			status = 400
-			return { data: null }
-		}
-		return response
-	}).catch(() => { 		
-		status = 500
-		return { data: null }
-	})
-	return { data, status }
+	const { items, nextPageToken } = await fetchNextPage(formatQuery(playlistId), pageToken)
+	addPlaylistItems(items)
+	return getPlaylistItems(playlistId, false, nextPageToken ?? null)
+}
+
+const addPlaylistItems = (items: PlaylistItem[]=[]): void => {
+	const item = items.shift() ?? null
+	if (item === null) return
+	if (item.snippet.title === 'Deleted video' || item.snippet.title === 'Private video') {
+		const deleted = item.snippet.title === 'Deleted video'
+		notifs.push(NotifType.Yellow, `Load Failed - ${deleted ? 'Deleted' : 'Private'}`, `Video with id ${item.contentDetails.videoId} failed to load due to it being ${deleted ? 'deleted' : 'private'}`)
+		return addPlaylistItems(items)
+	}
+	playlist.add(item, null)
+	return addPlaylistItems(items)
 }
 
 export { getPlaylistItems }

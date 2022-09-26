@@ -1,145 +1,107 @@
 <script lang='ts'>
-	import Controls from './Controls.svelte';
-	import { getThumbnail } from '../utils/getThumbnail';
-	import { onMount } from 'svelte';
+	import { getThumbnail } from '@/utils/getThumbnail';
 	import YoutubePlayer from 'youtube-player';
-	import { playlist, current, lockNow, ignorePrev, playState, isLoop, isPaused } from '../store';
-	import type { PlaylistItem, QueueItem } from '../interfaces';
+	import { notifs, playlist, currentPos, current, playState } from '@/store';
 	import type { YouTubePlayer } from 'youtube-player/dist/types';
-	import PlayerStates from 'youtube-player/dist/constants/PlayerStates.js';
-import Queue from './Queue.svelte';
-		
+	import { sineOut } from "svelte/easing";
+    import { fly } from "svelte/transition";
+    import type { PlaylistItem } from '@/interfaces/PlaylistItem';
+    import { NotifType } from '@/interfaces/NotifType';
+    import PlayerStates from 'youtube-player/dist/constants/PlayerStates';
+    import Spinner from './Spinner.svelte';
+
+	let loading: boolean 
 	let player: YouTubePlayer
-	let innerWidth: number;
-	let hidden = false;
-	$: playerWidth = innerWidth > 640 ? innerWidth: 640;
-	$: playerHeight = innerWidth > 640 ? (innerWidth * .5265) : 390;
-	$: thumbnail =  $current !== undefined ? getThumbnail($current.item) : getThumbnail($playlist[0].item)
-	$: isShuffling: true // TODO lol (for disabling buttons)
-	$current = $playlist[0]
-	// while buttons are disabled, change scro0lling text content to ...shuffling"
-	onMount(() => {
-		player = YoutubePlayer('player', { width: playerWidth, height: playerHeight, playerVars: {  autoplay: 1 }})
+	let innerWidth: number
+	$: playerWidth = innerWidth > 640 ? innerWidth : 640
+	$: playerHeight = innerWidth > 640 ? (innerWidth * .5265) : 390
+
+	const initPlayer = (node: HTMLElement) => {
+		player = YoutubePlayer(node, { width: playerWidth, height: playerHeight, playerVars: {  autoplay: 1 }})
 		player.setVolume(100);
 		// TODO make a volume slider
 		// TODO remove default player styles
-		player.on('ready', async () => await play())
-		player.on('stateChange', async (e) => {
-			$playState = e.data
-			switch ($playState) { // TODO why a store bruh
-				case 0:
-					if (($current.position + 1) < $playlist.length) {
-						if ($isLoop === false) {
-							$current = $playlist[$current.position + 1] 
-						} 
-						await play()
-					}
-					break;
-				case 1:
-					$isPaused = false
-					break;
-				case 2:
-					$isPaused = true
-					break;
-			}			
+		player.on('ready', async () => {
+			loading = false;
+			await play()
 		})
-	});
-	// TODO: touch support 
-	const play = async () => {
-		await player.loadVideoById($current.item.contentDetails.videoId)
-		await player.playVideo()		
+		player.on('stateChange', async (e) => {
+			console.log(e.data);
+			$playState = e.data
+			if ($playState === PlayerStates.ENDED) {
+				if (($currentPos + 1) >= $playlist.length) {
+					notifs.push(NotifType.Yellow, 'End of playlist', undefined, 5000)
+					return
+				}
+				if (playlist.isLooping === false) {
+					playlist.next()
+				} 
+				return play()
+			}
+		})
+		player.on('error', async () => {
+			const fail = $current
+			notifs.push(NotifType.Red, 'Unable to Play', `Playback of ${fail.snippet.title} disabled by owner`, 5000)
+			notifs.push(NotifType.Yellow, 'Removing unplayable video...', undefined, 5000)
+			playlist.remove($current)
+			if ($currentPos === $playlist.length - 1) {
+				notifs.push(NotifType.Yellow, 'End of playlist', undefined, 5000)
+				return
+			}
+			await play()
+		})
 	} 
+	const play = async () => {
+		notifs.push(NotifType.Green, 'Now Playing', `${$current.snippet.title}`)
+		try {
+			await player.loadVideoById($current.contentDetails.videoId)
+			await player.playVideo()	
+		} catch {
+			console.log('🐷')
+		}
+	}
 	const pause = async () => {
-		const playerState = await player.getPlayerState()
-		if (playerState !== PlayerStates.PAUSED && playerState !== PlayerStates.PLAYING) return
-		playerState === PlayerStates.PAUSED ? await player.playVideo() : await player.pauseVideo()
+		if ($playState !== PlayerStates.PAUSED && $playState !== PlayerStates.PLAYING) return
+		$playState === PlayerStates.PAUSED ? await player.playVideo() : await player.pauseVideo()
 	}
 </script>
-<!-- TODO on:keydown={handleKeyDown} on:keyup={handleKeyUp} -->
+
 <svelte:window bind:innerWidth />
-<div class="wrapper">
-	<!-- <div class="background" style={`background-image: url(${thumbnail});`}></div> -->
-	<!-- <span class="player__section">
-		<button class="player__hide" on:click={() => hidden = !hidden}>Hide Player</button>
-	</span>	 -->
-	<div class="player__wrapper">
-		<div id="player" class:hidden></div>
-	</div>
-	<Queue on:play={async () => await play()} />
+<div class="playerContainer">
+	{#if loading}
+		<Spinner/>
+	{:else}
+		<div id="player" use:initPlayer in:fly="{{ y: 50, duration: 500, easing: sineOut }}"></div>
+	{/if}
 </div>
-<Controls on:pause={async () => await pause()} on:play={async () => await play()}/>
+<slot {play} {pause}/>
+
 <style>
-.wrapper {
-	width: 100%;
-	display: grid;
-	grid-template-columns: 60%, 1fr;
-}
-/* .background {
-	background-repeat: no-repeat;
-	background-size: contain;
-	background-position: center center;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	position: absolute;
-	opacity: .7;
-	background-color: black;
-} */
-.player__wrapper {
-	width: 100%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-#player {
-	width: 640px;
-	height: 390px;
-	opacity: 100;
-}
-@media screen and (max-width: 640px) {
-	/* .player__section {
-		width: 100vw;
-		background-color: var(--blue-10);
-		color: var(--blue-75);
-		text-align: center;
-		z-index: 100;
-	}
-	.player__hide {
-		height: min(5.625vw, 1.5rem);
-		width: min(20.625vw, 5.5rem);
-		margin: min(1.875vw, .5rem);
-		border-radius: min(2.813vw, .75rem);
-		border-width: 0;
-		background-color: var(--blue-45);
-		color: var(--blue-80);
-		font-size: min(2.813vw, .75rem);
-	} 
-	.player__hide:hover {
-		background-color: var(--blue-50);
-	}
-	.player__hide:active {
-		transform: translateY(.125rem);
-	} */
-	.wrapper {
-		grid-template-columns: 1fr;
+	.playerContainer {
+		width: calc(640px + min(2.5rem, 6.25vw));
+		height: calc(390px + min(2.5rem, 6.25vw));
+		border-radius: min(1rem, 2.5vw);
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		background-color: var(--blue-800);
+		box-shadow: inset 0 1px 0 var(--blue-700), 0px 1px 3px hsla(0, 0%, 0%, .5);
 	}
 	#player {
-		margin-top: 1vh;
-		width: 100vw;
-		height: calc(100vw / 1.64);
+		grid-area: player;
+		width: 640px;
+		height: 390px;
+		opacity: 100;
+		/* TODO LOL LOL */
+	}
+@media screen and (max-width: 720px) {
+	#player, .playerContainer {
+		width: min(88vw, 640px);
+		height: calc(min(88vw, 640px) / 1.64);
+	}
+	.playerContainer {
+		width: calc(min(88vw, 640px) + min(2.5rem, 6.25vw));
+		height: calc(calc(min(88vw, 640px) / 1.64) + min(2.5rem, 6.25vw));
 	}
 } 
-@media screen and (min-width: 1080px) {
-	.wrapper {
-		
-		grid-template-columns: 1fr 1fr;
-	}
-	.player__wrapper {
-		height: 100%;
-		width: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-}
 </style>

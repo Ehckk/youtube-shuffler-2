@@ -7,6 +7,9 @@ const config = {
 	// for more information about preprocessors
 	preprocess: preprocess(),
 	kit: {
+		alias: {
+			'@': './src'
+		},
 		adapter: adapter(),
 		outDir: 'build'
 	}

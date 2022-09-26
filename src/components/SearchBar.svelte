@@ -1,89 +1,88 @@
 <script lang="ts">
-import { createEventDispatcher } from 'svelte';
+	import { sineOut } from 'svelte/easing'
+	import { fly } from 'svelte/transition';
+    import { createEventDispatcher } from 'svelte';
+    import { searching, shuffling } from '@/store';
 
-const dispatch = createEventDispatcher()
-let searchBar: HTMLInputElement
+	export let player: {}
+	let value: string = '';
+	let input: HTMLInputElement;
 
-const onSubmit = () => {
-	dispatch('search', { query: searchBar.value })
-}
-
-const onKeyDown = (e: KeyboardEvent) => {
-	if (e.code === 'Enter') {
-		e.preventDefault()
-		onSubmit()
+	$: disabled = $searching || $shuffling
+	
+	const dispatch = createEventDispatcher()
+	const handleSearch = () => {
+		if (value.length === 0) return
+		player = {}
+		window.scrollTo({ top: input.getBoundingClientRect().top, behavior: 'smooth' })
+		dispatch('search', { key: value })
 	}
-}
 </script>
 
+<div class="searchbar" in:fly="{{ delay: 1000, y: 100, duration: 1000, easing: sineOut }}">
+	<h1 class="searchbar__header">Search for a Playlist</h1>
+	<input class="searchbar__input" 
+		bind:value={value} bind:this={input} type="text" class:disabled on:keydown={(e => e.code === 'Enter' ? handleSearch() : {})} placeholder="Ex: https://www.youtube.com/playlist?list=PLLyyQlIzBmeGS9y8pdkePon6zgYkquZ8D"/>
+	{#if value.length > 0}
+		<button class="searchbar__button" class:disabled 
+			on:click="{handleSearch}" transition:fly="{{ y: 50, duration: 200, easing: sineOut }}">Search</button>
+	{/if}
+</div>
+
 <style>
-.searchBar {
-	width: 100vw;
-	background-image: linear-gradient(180deg, var(--blue-5) 25%, var(--blue-10) 75%);
-	display: flex;
-	justify-content: center;
-	flex-direction: column;
-	align-items: center;
-	z-index: 1;
-}
-.searchBar__label {
-	font-size: min(6vw, 1.625rem);
-	color: var(--blue-85);
-	margin: min(1.875vw, .5rem);
-}
-.searchBar__input {
-	min-height: min(5.625vw, 1.5rem);
-	width: 77.5%;
-	border-radius: min(1.875vw, .5rem);
-	border-width: .125rem;
-	padding: min(1.406vw, .375rem);
-	font-size: min(2.813vw, .75rem);
-	background-color: var(--blue-85);
-	border-style: solid;
-	border-color: var(--blue-10);
-	color: var(--blue-15);
-}
-.searchBar__input::placeholder {
-	user-select: none;
-	color: var(--blue-15);
-	opacity: .6;
-}
-.searchBar__input:focus {
-	border-color: var(--blue-55);
-}
-.searchBar__button {
-	height: min(11.25vw, 3rem);
-	width: min(30vw, 8rem);
-	margin: min(1.875vw, .5rem);
-	border-radius: min(5.625vw, 1.5rem);
-	border-width: 0;
-	background-color: var(--blue-45);
-	color: var(--blue-95);
-	font-size: min(5.625vw, 1.5rem);
-}
-
-.searchBar__button:hover {
-	background-color: var(--blue-50);
-}
-
-.searchBar__button:active {
-	transform: translateY(.125rem);
-}
-@media screen and (min-width: 640px) {
-	.searchBar__input {
-		width: 31rem;
+	.searchbar {
+		display: grid; 
+		grid-template-rows: min(8rem, 20vw) min(5.5rem, 13.75vw) min(4rem, 10vw); 
+		align-items: center;
+		justify-items: center;
 	}
-} 
-@media screen and (min-width: 840px) {
-	.searchBar {
-		flex-direction: row;
+	.searchbar__header {
+		margin-top: min(3rem, 7.5vw);
+		font-size: min(4rem, 10vw);
+		font-weight: bold; 
+		color: var(--grey-200);
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+	.searchbar__input {
+		height: min(2.5rem, 6.25vw);
+		width: min(40rem, 80vw);
+		margin: min(1rem, 2.5vw);
+		border-radius: min(.5rem, 1.25vw);
 		padding: .5rem;
+		background-color: var(--grey-200);
+		color: var(--blue-800);
+		font-size: min(1rem, 2.5vw);
+		font-weight: 500;
+		outline: none;
+		border: none;
+		box-shadow: inset 0 2px 2px hsla(0, 0%, 0%, .25), inset 0 -2px 0 hsla(0, 0%, 100%, .2);
 	}
-} 
+	.searchbar__input::placeholder {
+		color: var(--grey-700);
+		font-size: min(1rem, 2.5vw);
+		user-select: none;
+	}
+	.searchbar__button {
+		height: min(4rem, 10vw);
+		width: min(12rem, 30vw);
+		border-style: none;
+		border-width: 0;
+		border-radius: min(.5rem, 1.25vw);
+		background-color: var(--blue-500);
+		color: var(--grey-200);
+		font-size: min(2.5rem, 6.25vw);
+		font-weight: 700;
+		user-select: none;	
+		box-shadow: inset 0 1px 0 var(--blue-400), 0 1px 3px hsla(0, 0%, 0%, .2);
+	}
+	.searchbar__button:active, .searchbar__button.disabled {
+		transform: translateY(min(.25rem, .625vw));
+		background-color: var(--blue-600);
+		box-shadow: none;
+	}
+	.searchbar__input.disabled, .searchbar__button.disabled {
+		pointer-events: none;
+	}
 </style>
-
-<form class="searchBar" on:submit|preventDefault={onSubmit}>
-	<h2 class="searchBar__label">Playlist Id: </h2>
-	<input class="searchBar__input" type="text" on:keydown={onKeyDown} bind:this={searchBar} placeholder="Ex: PLLyyQlIzBmeHf7yTLeM0ahRyfoKZXHDLy">
-	<button class="searchBar__button" type="submit">Search</button>
-</form>
