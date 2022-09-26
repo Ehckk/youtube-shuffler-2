@@ -30,15 +30,14 @@
 		playlist.next()
 		dispatch('play')
 	}
-	const handleShuffle = () => {
+	const handleShuffle = async () => {
 		// TODO shuffle options such as skipPrev and lockCurrent
 		$shuffling = true
 		notifs.push(NotifType.Yellow, 'Shuffling...')
-		playlist.shuffle().then(() => {
-			$shuffling = false
-			$queue.scrollTo({ top: $queue.offsetTop - 144, behavior: 'smooth' })
+		await playlist.shuffle()
+		$shuffling = false
+		$queue.scrollTo({ top: $queue.offsetTop - 144, behavior: 'smooth' })
 			// TODO only update currentIndex if the song pos changes ? 
-		})
 		$currentPos = 0
 	}
 </script>
