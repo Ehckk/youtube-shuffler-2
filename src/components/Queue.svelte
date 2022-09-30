@@ -1,9 +1,10 @@
 <script lang="ts">
 	import Item from './Item.svelte';
-	import { playlist, queue } from '@/store'
+	import { playlist, queue, shuffling } from '@/store'
     import { sineOut } from 'svelte/easing';
     import { fly } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
+    import Spinner from './Spinner.svelte';
 
 	export let play: () => Promise<void>
 	
@@ -16,11 +17,15 @@
 </script>
 <!-- TODO put transition on  -->
 <div class="queue" bind:this={$queue} use:scroll in:fly="{{ y: 50, duration: 500, easing: sineOut }}">
-	{#each items as item, index (item.id)}
-		<div class="itemWrapper" animate:flip={{ duration: 200, easing: sineOut }}>
-			<Item {item} {index} on:play={() => play()}/>
-		</div>	
-	{/each}
+	{#if $shuffling}
+		<Spinner/>
+	{:else}
+		{#each items as item, index (item.id)}
+			<div class="itemWrapper" animate:flip={{ duration: 200, easing: sineOut }}>
+				<Item {item} {index} on:play={() => play()}/>
+			</div>	
+		{/each}
+	{/if}
 </div>
 
 <style>

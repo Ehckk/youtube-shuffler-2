@@ -4,7 +4,7 @@
 </script>
 
 <div class="spinnerWrapper">
-	<div class="spinner" in:fly="{{ y: 50, duration: 200, easing: sineOut }}" >
+	<div class="spinner" in:fly="{{ y: 50, duration: 100, easing: sineOut }}" >
 		<svg class="spinner__logo" viewBox="0 0 200 200" width="100" height="100" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
 			<linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
 			<stop offset="25%" stop-color="var(--blue-900)" />

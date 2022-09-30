@@ -10,7 +10,7 @@
     import PlayerStates from 'youtube-player/dist/constants/PlayerStates';
     import Spinner from './Spinner.svelte';
 
-	let loading: boolean 
+	let loading: boolean = true
 	let player: YouTubePlayer
 	let innerWidth: number
 	$: playerWidth = innerWidth > 640 ? innerWidth : 640
@@ -22,7 +22,7 @@
 		// TODO make a volume slider
 		// TODO remove default player styles
 		player.on('ready', async () => {
-			loading = false;
+			loading = false
 			await play()
 		})
 		player.on('stateChange', async (e) => {
@@ -68,10 +68,11 @@
 
 <svelte:window bind:innerWidth />
 <div class="playerContainer">
+	<div id="player" use:initPlayer in:fly="{{ y: 50, duration: 500, easing: sineOut }}"></div>
 	{#if loading}
-		<Spinner/>
-	{:else}
-		<div id="player" use:initPlayer in:fly="{{ y: 50, duration: 500, easing: sineOut }}"></div>
+		<div class="playerSpinner">
+			<Spinner/>
+		</div>
 	{/if}
 	<!-- TODO Option menu and volume slider -->
 	<!-- TODO Override shitty youtube player styles in a css stylesheet -->
@@ -95,6 +96,14 @@
 		height: 390px;
 		opacity: 100;
 		/* TODO LOL LOL */
+	}
+	.playerSpinner {
+		width: calc(640px + min(2.5rem, 6.25vw));
+		height: calc(390px + min(2.5rem, 6.25vw));
+		position: absolute;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 @media screen and (max-width: 720px) {
 	#player, .playerContainer {

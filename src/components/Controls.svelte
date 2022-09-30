@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from "svelte";
-	import { playlist, notifs, currentPos, current, playState, loop, shuffling, searching, queue } from "@/store";
+	import { playlist, notifs, currentPos, current, playState, loop, shuffling, searching, queue, shuffleOptions } from "@/store";
 	import Marquee from "./Marquee.svelte";
     import { sineOut } from "svelte/easing";
     import { fly } from "svelte/transition";
@@ -33,12 +33,32 @@
 	const handleShuffle = async () => {
 		// TODO shuffle options such as skipPrev and lockCurrent
 		$shuffling = true
-		notifs.push(NotifType.Yellow, 'Shuffling...')
-		await playlist.shuffle()
+		await new Promise(resolve => setTimeout(resolve, 500))
+		const items = $playlist.map((item) => item)
+		const shuffleItems: PlaylistItem[] = []
+		const newItems: PlaylistItem[] = [] 
+		const prevItems = items.slice(0, $currentPos)
+		const currentItem = $current
+		const nextItems = items.slice($currentPos + 1, items.length)
+		$shuffleOptions.ignorePrev ? newItems.push(...prevItems) : shuffleItems.push(...prevItems) 
+		$shuffleOptions.keepCurrent ? newItems.push(currentItem) : shuffleItems.push(currentItem) 
+		// TODO fully implement this with an options menu
+		shuffleItems.push(...nextItems)
+		let n = 0
+		while (shuffleItems.length > 0) {
+			n++
+			newItems.push(...shuffleItems.splice(Math.floor(Math.random() * shuffleItems.length), 1))				
+			console.log(n);
+		}
+		console.log(newItems);
+		$playlist = newItems
+		console.log($playlist);
 		$shuffling = false
-		$queue.scrollTo({ top: $queue.offsetTop - 144, behavior: 'smooth' })
-			// TODO only update currentIndex if the song pos changes ? 
-		$currentPos = 0
+		notifs.push(NotifType.Yellow, 'Shuffled')
+		// $queue.scrollTo({ top: $queue.offsetTop - 144, behavior: 'smooth' })
+		// 	// TODO only update currentIndex if the song pos changes ? 
+		// $currentPos = 0
+
 	}
 </script>
 

@@ -46,25 +46,6 @@ const createPlaylist = () => {
 	const prev = () => {
 		currentPos.set(get(currentPos) - 1)
 	}
-	const shuffle = async () => {
-		update((n) => {
-			let items: PlaylistItem[] = [] 
-			const options = get(shuffleOptions)
-			const prevItems = n.slice(0, get(currentPos))
-			const currentItem = get(current)
-			const nextItems = n.slice(get(currentPos) + 1, n.length)
-			n = []
-			options.ignorePrev ? n.push(...prevItems) : items.push(...prevItems) 
-			options.keepCurrent ? n.push(currentItem) : items.push(currentItem) 
-			// TODO fully implement this with an options menu
-			items.push(...nextItems)
-			while (items.length > 0) {
-				n.push(items.splice(Math.floor(Math.random() * items.length), 1)[0])				
-			}
-			console.log(n.length);
-			return n
-		})
-	}
 	const clear = () => {
 		update(() => [])
 		currentPos.set(0)
@@ -75,7 +56,7 @@ const createPlaylist = () => {
 	const loop = () => {
 		isLooping = !isLooping 
 	}
-	return { subscribe, update, add, remove, shuffle, next, prev, clear, pause, loop, isPaused, isLooping }
+	return { subscribe, update, set, add, remove, next, prev, clear, pause, loop, isPaused, isLooping }
 }
 const playlist = createPlaylist()
 const current = derived<[typeof playlist, typeof currentPos], PlaylistItem>([playlist, currentPos], ([$playlist, $currentPos]) => $playlist[$currentPos])
