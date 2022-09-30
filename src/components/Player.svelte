@@ -73,6 +73,8 @@
 	{:else}
 		<div id="player" use:initPlayer in:fly="{{ y: 50, duration: 500, easing: sineOut }}"></div>
 	{/if}
+	<!-- TODO Option menu and volume slider -->
+	<!-- TODO Override shitty youtube player styles in a css stylesheet -->
 </div>
 <slot {play} {pause}/>
 
