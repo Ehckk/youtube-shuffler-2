@@ -65,5 +65,6 @@ const searching = writable<boolean>(false)
 const playState = writable<PlayerStates>(-1)
 const loop= writable<boolean>(false)
 const queue = writable<HTMLDivElement>()
+const showSettings = writable<boolean>(false);
 
-export { notifs, shuffleOptions, currentPos, playlist, current, searching, shuffling, playState, loop, queue }
+export { notifs, shuffleOptions, currentPos, playlist, current, searching, shuffling, playState, loop, queue, showSettings }

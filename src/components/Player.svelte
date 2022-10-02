@@ -1,11 +1,9 @@
 <script lang='ts'>
-	import { getThumbnail } from '@/utils/getThumbnail';
 	import YoutubePlayer from 'youtube-player';
 	import { notifs, playlist, currentPos, current, playState } from '@/store';
 	import type { YouTubePlayer } from 'youtube-player/dist/types';
 	import { sineOut } from "svelte/easing";
     import { fly } from "svelte/transition";
-    import type { PlaylistItem } from '@/interfaces/PlaylistItem';
     import { NotifType } from '@/interfaces/NotifType';
     import PlayerStates from 'youtube-player/dist/constants/PlayerStates';
     import Spinner from './Spinner.svelte';
@@ -13,13 +11,16 @@
 	let loading: boolean = true
 	let player: YouTubePlayer
 	let innerWidth: number
+	let getVolume: () => Promise<number> = async () => { return 0 }
+	let setVolume: (volume: number) => Promise<void> = async (volume: number) => {}
 	$: playerWidth = innerWidth > 640 ? innerWidth : 640
 	$: playerHeight = innerWidth > 640 ? (innerWidth * .5265) : 390
 
 	const initPlayer = (node: HTMLElement) => {
 		player = YoutubePlayer(node, { width: playerWidth, height: playerHeight, playerVars: {  autoplay: 1 }})
-		player.setVolume(100);
-		// TODO make a volume slider
+		player.setVolume(50);
+		getVolume = player.getVolume
+		setVolume = player.setVolume
 		// TODO remove default player styles
 		player.on('ready', async () => {
 			loading = false
@@ -64,6 +65,7 @@
 		if ($playState !== PlayerStates.PAUSED && $playState !== PlayerStates.PLAYING) return
 		$playState === PlayerStates.PAUSED ? await player.playVideo() : await player.pauseVideo()
 	}
+	
 </script>
 
 <svelte:window bind:innerWidth />
@@ -77,7 +79,7 @@
 	<!-- TODO Option menu and volume slider -->
 	<!-- TODO Override shitty youtube player styles in a css stylesheet -->
 </div>
-<slot {play} {pause}/>
+<slot {play} {pause} volume={{ set: setVolume, get: getVolume }}/>
 
 <style>
 	.playerContainer {

@@ -5,11 +5,13 @@
 	import '@/app.css'
     import Notification from '@/components/Notification.svelte';
 	import { notifs } from "@/store";
+    import Modal from '@/components/Modal.svelte';
 
 	$: items = $notifs.filter((i) => i)
 </script>
 
 <slot/>
+<Modal></Modal>
 <div class="notifBar">
 	{#if items.length > 0}
 		{#each items as notif (notif.id)}
@@ -30,7 +32,8 @@
 		max-width: min(23rem, 57.5vw);
 		padding: min(1rem, 2.5vw);
 		max-height: 100vh;
-		overflow-y: scroll;
+		overflow-y: visible;
+		overflow-x: visible;
 		scrollbar-width: 0;
 		top: 0;
 		left: 0;

@@ -50,9 +50,9 @@
 			<Spinner/>
 		{:then}	
 		<!-- TODO: Why pass events when you can just use stores?  -->
-		<Player let:play let:pause>
+		<Player let:play let:pause let:volume>
 			<Queue {play}/>
-			<Controls on:pause={() => pause()} on:play={() => play()}/>
+			<Controls {play} {volume} on:pause={() => pause()} on:play={() => play()}/>
 		</Player>
 		{/await}
 		</div>

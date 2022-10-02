@@ -2,7 +2,7 @@
 	import { sineOut } from 'svelte/easing'
 	import { fly } from 'svelte/transition';
     import { createEventDispatcher } from 'svelte';
-    import { searching, shuffling } from '@/store';
+    import { searching, showSettings, shuffling } from '@/store';
 
 	export let player: {}
 	let value: string = '';
@@ -46,6 +46,7 @@
 		align-items: center;
 	}
 	.searchbar__input {
+		appearance: none;
 		height: min(2.5rem, 6.25vw);
 		width: min(40rem, 80vw);
 		margin: min(1rem, 2.5vw);
@@ -60,7 +61,7 @@
 		box-shadow: inset 0 2px 2px hsla(0, 0%, 0%, .25), inset 0 -2px 0 hsla(0, 0%, 100%, .2);
 	}
 	.searchbar__input::placeholder {
-		color: var(--grey-700);
+		color: var(--grey-800);
 		font-size: min(1rem, 2.5vw);
 		user-select: none;
 	}
@@ -76,6 +77,13 @@
 		font-weight: 700;
 		user-select: none;	
 		box-shadow: inset 0 1px 0 var(--blue-400), 0 1px 3px hsla(0, 0%, 0%, .2);
+		transition-property: transform;
+		transition-duration: .125s; 
+		transition-timing-function: ease-in-out;
+	}
+	.searchbar__button:hover {
+		transition-property: transform;
+		transform: scale(1.125);
 	}
 	.searchbar__button:active, .searchbar__button.disabled {
 		transform: translateY(min(.25rem, .625vw));
