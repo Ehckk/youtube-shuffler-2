@@ -16,7 +16,7 @@
 	let slider: HTMLInputElement
 	let vol: number = 50
 	// TODO use this to disable all buttons
-	$: disabled = $searching || $shuffling
+	$: disabled = $searching || $shuffling || ($playState <= PlayerStates.ENDED)
 	$: isPaused = $playState === PlayerStates.PAUSED
 	$: isLoop = $loop === true
 
